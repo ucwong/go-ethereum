@@ -104,23 +104,18 @@ func TestProgpowKeccak256(t *testing.T) {
 		t.Errorf("expected %s, got %x", exp, hash)
 	}
 }
-func hashForBlock(blocknum uint64, nonce uint64, headerHash common.Hash) ([]byte, []byte, error) {
-	size := cacheSize(blocknum)
-	cache := make([]uint32, size/4)
-	seed := seedHash(blocknum)
-	epoch := blocknum / epochLength
-	generateCache(cache, epoch, seed)
-	cDag := make([]uint32, progpowCacheWords)
-	generateCDag(cDag, cache, epoch)
-	datasetSize := datasetSize(blocknum)
-
-	keccak512 := makeHasher(sha3.NewKeccak512())
-	lookup := func(index uint32) []byte {
-		return generateDatasetItem(cache, index/16, keccak512)
+func TestProgpowKeccak64(t *testing.T) {
+	result := make([]uint32, 8)
+	header := make([]byte, 32)
+	hash := keccakF800Short(header, 0, result)
+	exp := uint64(0x5dd431e5fbc604f4)
+	if exp != hash {
+		t.Errorf("expected %x, got %x", exp, hash)
 	}
-	digest, result := progpow(headerHash.Bytes(), nonce, datasetSize, blocknum, cDag, lookup)
+}
 
-	return digest, result, nil
+func hashForBlock(blocknum uint64, nonce uint64, headerHash common.Hash) ([]byte, []byte, error) {
+	return speedyHashForBlock(&periodContext{}, blocknum, nonce, headerHash)
 }
 
 type periodContext struct {
@@ -150,20 +145,20 @@ func speedyHashForBlock(ctx *periodContext, blocknum uint64, nonce uint64, heade
 	lookup := func(index uint32) []byte {
 		return generateDatasetItem(ctx.cache, index/16, keccak512)
 	}
-	digest, result := progpow(headerHash.Bytes(), nonce, ctx.datasetSize, blocknum, ctx.cDag, lookup)
+	mixhash, final := progpow(headerHash.Bytes(), nonce, ctx.datasetSize, blocknum, ctx.cDag, lookup)
 
-	return digest, result, nil
+	return mixhash, final, nil
 }
 
 func TestProgpowHash(t *testing.T) {
-	digest, result, _ := hashForBlock(0, 0, common.Hash{})
-	expdig := common.FromHex("7d5b1d047bfb2ebeff3f60d6cc935fc1eb882ece1732eb4708425d2f11965535")
-	expres := common.FromHex("8c091b4eebc51620ca41e2b90a167d378dbfe01c0a255f70ee7004d85a646e17")
-	if !bytes.Equal(digest, expdig) {
-		t.Errorf("digest err, got %x expected %x", digest, expdig)
+	mixHash, finalHash, _ := hashForBlock(0, 0, common.Hash{})
+	expHash := common.FromHex("5391770a00140cfab1202df86ab47fb86bb299fe4386e6d593d4416b9414df92")
+	expMix := common.FromHex("d46c7c0a927acead9f943bee6ed95bba40dfbe6c24b232af3e7764f6c8849d41")
+	if !bytes.Equal(mixHash, expMix) {
+		t.Errorf("mixhash err, got %x expected %x", mixHash, expMix)
 	}
-	if !bytes.Equal(result, expres) {
-		t.Errorf("result err, got %x expected %x", result, expres)
+	if !bytes.Equal(finalHash, expHash) {
+		t.Errorf("sealhash err, got %x expected %x", finalHash, expHash)
 	}
 }
 
@@ -205,22 +200,21 @@ func TestProgpowHashes(t *testing.T) {
 		if err != nil {
 			t.Errorf("test %d, nonce err: %v", i, err)
 		}
-		digest, result, err := speedyHashForBlock(&ctx,
+		mixhash, final, err := speedyHashForBlock(&ctx,
 			uint64(tt.blockNum),
 			uint64(nonce),
 			common.BytesToHash(common.FromHex(tt.headerHash)))
 		if err != nil {
 			t.Errorf("test %d, err: %v", i, err)
 		}
-		expectDigest := common.FromHex(tt.finalHash)
-		expectHash := common.FromHex(tt.mixHash)
-		if !bytes.Equal(digest, expectDigest) {
-			t.Fatalf("test %d (blocknum %d), digest err, got %x expected %x", i, tt.blockNum, digest, expectDigest)
+		expectFinalHash := common.FromHex(tt.finalHash)
+		expectMixHash := common.FromHex(tt.mixHash)
+		if !bytes.Equal(final, expectFinalHash) {
+			t.Errorf("test %d (blocknum %d), sealhash err, got %x expected %x", i, tt.blockNum, final, expectFinalHash)
 		}
-		if !bytes.Equal(result, expectHash) {
-			t.Fatalf("test %d (blocknum %d), result err, got %x expected %x", i, tt.blockNum, result, expectHash)
+		if !bytes.Equal(mixhash, expectMixHash) {
+			t.Fatalf("test %d (blocknum %d), mixhash err, got %x expected %x", i, tt.blockNum, mixhash, expectMixHash)
 		}
-		fmt.Printf("test %d ok!\n", i)
-		//break
+		//fmt.Printf("test %d ok!\n", i)
 	}
 }
