@@ -1,15 +1,32 @@
+// Copyright 2018 The go-ethereum Authors
+// This file is part of go-ethereum.
+//
+// go-ethereum is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// go-ethereum is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+
 package ethash
 
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto/sha3"
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
 	"testing"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto/sha3"
 )
 
 func TestRandomMerge(t *testing.T) {
@@ -36,6 +53,56 @@ func TestRandomMerge(t *testing.T) {
 		}
 	}
 
+}
+
+func TestProgpowChanges(t *testing.T) {
+	headerHash := common.HexToHash("ffeeddccbbaa9988776655443322110000112233445566778899aabbccddeeff")
+	nonce := uint64(0x123456789abcdef0)
+	blocknum := uint64(30000)
+	seed := seedHash(blocknum)
+	fmt.Printf("seedHash %x\n", seed)
+	//seed =  common.FromHex("ee304846ddd0a47b")
+	expCdag0_to_15 := []uint32{
+		0xb3e35467, 0xae7402e3, 0x8522a782, 0xa2d8353b,
+		0xff4723bd, 0xbfbc05ee, 0xde6944de, 0xf0d2b5b8,
+		0xc74cbad3, 0xb100f797, 0x05bc60be, 0x4f40840b,
+		0x35e47268, 0x9cd6f993, 0x6a0e4659, 0xb838e46e,
+	}
+	expCdag4080_to_4095 := []uint32{
+		0xbde0c650, 0x57cba482, 0x54877c9d, 0xf9fdc423,
+		0xfb65141b, 0x55074ca4, 0xc7dd116e, 0xbc1737d1,
+		0x126e8847, 0xb16983b2, 0xf80c058e, 0xe0ad53b5,
+		0xd5f3e840, 0xff1bdd89, 0x35660a19, 0x73244193,
+	}
+	epoch := blocknum / epochLength
+	size := cacheSize(blocknum)
+	cache := make([]uint32, size/4)
+	generateCache(cache, epoch, seed)
+	cDag := make([]uint32, progpowCacheWords)
+	generateCDag(cDag, cache, epoch)
+
+	for i := 0; i < 15; i++ {
+		if exp := expCdag0_to_15[i]; exp != cDag[i] {
+			t.Errorf("test %d, exp %x != %x", i, exp, cDag[i])
+
+		}
+		if exp := expCdag4080_to_4095[i]; exp != cDag[4080+i] {
+			t.Errorf("test %d (+4080), exp %x != %x", i, exp, cDag[4080+i])
+		}
+	}
+	mixHash, finalHash, _ := hashForBlock(blocknum, nonce, headerHash)
+	fmt.Printf("mixHash %x\n", mixHash)
+	fmt.Printf("finalHash %x\n", finalHash)
+	expMix := common.FromHex("5f8238ed1e31fd81411fa87fecd237fa5327ea8c805d7d92ec8ceef7f6d3c853")
+	expHash := common.FromHex("d07296b3a63d8992dd2beeeb0b6bc28657ace93712ed3b6f6fc4442f693ece27")
+	if !bytes.Equal(expMix, mixHash) {
+		t.Errorf("mixhash err, expected %s, got %x", expMix, mixHash)
+	}
+	if !bytes.Equal(expHash, finalHash) {
+		t.Errorf("finhash err, expected %s, got %x", expHash, finalHash)
+	}
+	//digest: 7d9a5f6b1407796497f16b091e5dcbbcd711d025634b505fae496611c0d6f57d
+	//result (top 64 bits): 6cf196600abd663e
 }
 
 func TestCDag(t *testing.T) {
@@ -146,14 +213,13 @@ func speedyHashForBlock(ctx *periodContext, blocknum uint64, nonce uint64, heade
 		return generateDatasetItem(ctx.cache, index/16, keccak512)
 	}
 	mixhash, final := progpow(headerHash.Bytes(), nonce, ctx.datasetSize, blocknum, ctx.cDag, lookup)
-
 	return mixhash, final, nil
 }
 
 func TestProgpowHash(t *testing.T) {
 	mixHash, finalHash, _ := hashForBlock(0, 0, common.Hash{})
-	expHash := common.FromHex("5391770a00140cfab1202df86ab47fb86bb299fe4386e6d593d4416b9414df92")
-	expMix := common.FromHex("d46c7c0a927acead9f943bee6ed95bba40dfbe6c24b232af3e7764f6c8849d41")
+	expHash := common.FromHex("752b1d57497c9f66686acfa9a8251d4e2ad30dd9d09c536aed7085ee1ad69132")
+	expMix := common.FromHex("efc5c1fe4726469763ceb5fdcf3022b2915f9f36080b096da7c6e71fa34b6c26")
 	if !bytes.Equal(mixHash, expMix) {
 		t.Errorf("mixhash err, got %x expected %x", mixHash, expMix)
 	}
