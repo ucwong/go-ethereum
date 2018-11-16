@@ -93,13 +93,13 @@ func TestProgpowChanges(t *testing.T) {
 	mixHash, finalHash, _ := hashForBlock(blocknum, nonce, headerHash)
 	fmt.Printf("mixHash %x\n", mixHash)
 	fmt.Printf("finalHash %x\n", finalHash)
-	expMix := common.FromHex("5f8238ed1e31fd81411fa87fecd237fa5327ea8c805d7d92ec8ceef7f6d3c853")
-	expHash := common.FromHex("d07296b3a63d8992dd2beeeb0b6bc28657ace93712ed3b6f6fc4442f693ece27")
+	expMix := common.FromHex("44fa88669c864aa30ba7da46e557593289c4d1fb143a1c43813d512b14fb4636")
+	expHash := common.FromHex("b946ea7d74e3c619733ad73ac64a3c7671459b5d5d84d4f5c5cc09feb06ba2c3")
 	if !bytes.Equal(expMix, mixHash) {
-		t.Errorf("mixhash err, expected %s, got %x", expMix, mixHash)
+		t.Errorf("mixhash err, expected %x, got %x", expMix, mixHash)
 	}
 	if !bytes.Equal(expHash, finalHash) {
-		t.Errorf("finhash err, expected %s, got %x", expHash, finalHash)
+		t.Errorf("finhash err, expected %x, got %x", expHash, finalHash)
 	}
 	//digest: 7d9a5f6b1407796497f16b091e5dcbbcd711d025634b505fae496611c0d6f57d
 	//result (top 64 bits): 6cf196600abd663e
@@ -210,7 +210,9 @@ func speedyHashForBlock(ctx *periodContext, blocknum uint64, nonce uint64, heade
 	}
 	keccak512 := makeHasher(sha3.NewKeccak512())
 	lookup := func(index uint32) []byte {
-		return generateDatasetItem(ctx.cache, index/16, keccak512)
+		x := generateDatasetItem(ctx.cache, index/16, keccak512)
+		fmt.Printf("lookup(%d) : %x\n", index/16, x)
+		return x
 	}
 	mixhash, final := progpow(headerHash.Bytes(), nonce, ctx.datasetSize, blocknum, ctx.cDag, lookup)
 	return mixhash, final, nil
@@ -218,8 +220,8 @@ func speedyHashForBlock(ctx *periodContext, blocknum uint64, nonce uint64, heade
 
 func TestProgpowHash(t *testing.T) {
 	mixHash, finalHash, _ := hashForBlock(0, 0, common.Hash{})
-	expHash := common.FromHex("752b1d57497c9f66686acfa9a8251d4e2ad30dd9d09c536aed7085ee1ad69132")
-	expMix := common.FromHex("efc5c1fe4726469763ceb5fdcf3022b2915f9f36080b096da7c6e71fa34b6c26")
+	expHash := common.FromHex("7ea12cfc33f64616ab7dbbddf3362ee7dd3e1e20d60d860a85c51d6559c912c4")
+	expMix := common.FromHex("a09ffaa0f2b5d47a98c2d4fbc0e90936710dd2b2a220fce04e8d55a6c6a093d6")
 	if !bytes.Equal(mixHash, expMix) {
 		t.Errorf("mixhash err, got %x expected %x", mixHash, expMix)
 	}
