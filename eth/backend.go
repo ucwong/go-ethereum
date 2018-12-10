@@ -250,12 +250,12 @@ func CreateConsensusEngine(ctx *node.ServiceContext, chainConfig *params.ChainCo
 		return ethash.NewShared(chainConfig.ProgpowBlock)
 	default:
 		engine := ethash.New(ethash.Config{
-			CacheDir:       ctx.ResolvePath(config.CacheDir),
-			CachesInMem:    config.CachesInMem,
-			CachesOnDisk:   config.CachesOnDisk,
-			DatasetDir:     config.DatasetDir,
-			DatasetsInMem:  config.DatasetsInMem,
-			DatasetsOnDisk: config.DatasetsOnDisk,
+			CacheDir:           ctx.ResolvePath(config.CacheDir),
+			CachesInMem:        config.CachesInMem,
+			CachesOnDisk:       config.CachesOnDisk,
+			DatasetDir:         config.DatasetDir,
+			DatasetsInMem:      config.DatasetsInMem,
+			DatasetsOnDisk:     config.DatasetsOnDisk,
 			ProgpowBlockNumber: chainConfig.ProgpowBlock,
 		}, notify, noverify)
 		engine.SetThreads(-1) // Disable CPU mining
