@@ -39,12 +39,12 @@ func TestRandomMerge(t *testing.T) {
 	for i, tt := range []test{
 		{1000000, 101, 33000101},
 		{2000000, 102, 66003366},
-		{3000000, 103, 2999975},
-		{4000000, 104, 4000104},
+		{3000000, 103, 6000103},
+		{4000000, 104, 2000104},
 		{1000000, 0, 33000000},
 		{2000000, 0, 66000000},
-		{3000000, 0, 3000000},
-		{4000000, 0, 4000000},
+		{3000000, 0, 6000000},
+		{4000000, 0, 2000000},
 	} {
 		res := tt.a
 		merge(&res, tt.b, uint32(i))
@@ -93,8 +93,8 @@ func TestProgpowChanges(t *testing.T) {
 	mixHash, finalHash, _ := hashForBlock(blocknum, nonce, headerHash)
 	fmt.Printf("mixHash %x\n", mixHash)
 	fmt.Printf("finalHash %x\n", finalHash)
-	expMix := common.FromHex("44fa88669c864aa30ba7da46e557593289c4d1fb143a1c43813d512b14fb4636")
-	expHash := common.FromHex("b946ea7d74e3c619733ad73ac64a3c7671459b5d5d84d4f5c5cc09feb06ba2c3")
+	expMix := common.FromHex("11f19805c58ab46610ff9c719dcf0a5f18fa2f1605798eef770c47219274767d")
+	expHash := common.FromHex("5b7ccd472dbefdd95b895cac8ece67ff0deb5a6bd2ecc6e162383d00c3728ece")
 	if !bytes.Equal(expMix, mixHash) {
 		t.Errorf("mixhash err, expected %x, got %x", expMix, mixHash)
 	}
@@ -211,7 +211,7 @@ func speedyHashForBlock(ctx *periodContext, blocknum uint64, nonce uint64, heade
 	keccak512 := makeHasher(sha3.NewKeccak512())
 	lookup := func(index uint32) []byte {
 		x := generateDatasetItem(ctx.cache, index/16, keccak512)
-		fmt.Printf("lookup(%d) : %x\n", index/16, x)
+		//fmt.Printf("lookup(%d) : %x\n", index/16, x)
 		return x
 	}
 	mixhash, final := progpow(headerHash.Bytes(), nonce, ctx.datasetSize, blocknum, ctx.cDag, lookup)
@@ -220,8 +220,8 @@ func speedyHashForBlock(ctx *periodContext, blocknum uint64, nonce uint64, heade
 
 func TestProgpowHash(t *testing.T) {
 	mixHash, finalHash, _ := hashForBlock(0, 0, common.Hash{})
-	expHash := common.FromHex("7ea12cfc33f64616ab7dbbddf3362ee7dd3e1e20d60d860a85c51d6559c912c4")
-	expMix := common.FromHex("a09ffaa0f2b5d47a98c2d4fbc0e90936710dd2b2a220fce04e8d55a6c6a093d6")
+	expHash := common.FromHex("63155f732f2bf556967f906155b510c917e48e99685ead76ea83f4eca03ab12b")
+	expMix := common.FromHex("faeb1be51075b03a4ff44b335067951ead07a3b078539ace76fd56fc410557a3")
 	if !bytes.Equal(mixHash, expMix) {
 		t.Errorf("mixhash err, got %x expected %x", mixHash, expMix)
 	}
@@ -260,10 +260,6 @@ func TestProgpowHashes(t *testing.T) {
 	}
 	var ctx periodContext
 	for i, tt := range tests {
-		// Only run test 0,1,49,50,51,99,100, 101 .. etc
-		if !(i+1%50 == 0 || i%50 == 0 || i-1%50 == 0) {
-			continue
-		}
 		nonce, err := strconv.ParseInt(tt.nonce, 16, 64)
 		if err != nil {
 			t.Errorf("test %d, nonce err: %v", i, err)
