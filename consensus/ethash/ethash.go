@@ -750,8 +750,7 @@ func (ethash *Ethash) lightPow(number *big.Int) powLight {
 			ethashCache := ethash.cache(blockNumber)
 			if ethashCache.cDag == nil {
 				log.Warn("cDag is nil, suboptimal performance")
-				var cDag []uint32
-				cDag = make([]uint32, progpowCacheWords)
+				cDag := make([]uint32, progpowCacheWords)
 				generateCDag(cDag, ethashCache.cache, blockNumber/epochLength)
 				ethashCache.cDag = cDag
 			}

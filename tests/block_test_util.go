@@ -116,7 +116,7 @@ func (t *BlockTest) Run() error {
 	if t.json.SealEngine == "NoProof" {
 		engine = ethash.NewFaker()
 	} else {
-		engine = ethash.NewShared(new(big.Int))
+		engine = ethash.NewShared(nil)
 	}
 	chain, err := core.NewBlockChain(db, &core.CacheConfig{TrieCleanLimit: 0}, config, engine, vm.Config{}, nil)
 	if err != nil {
