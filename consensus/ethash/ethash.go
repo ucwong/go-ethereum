@@ -18,6 +18,7 @@
 package ethash
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"math"
@@ -736,7 +737,23 @@ type powLight func(size uint64, cache []uint32, hash []byte, nonce, number uint6
 // fullPow returns either hashimoto or progpow full checker depending on number
 func (ethash *Ethash) fullPow(number *big.Int) powFull {
 	if progpowNumber := ethash.config.ProgpowBlockNumber; progpowNumber != nil && progpowNumber.Cmp(number) <= 0 {
-		return progpowFull
+		ethashCache := ethash.cache(number.Uint64())
+		if ethashCache.cDag == nil {
+			log.Warn("cDag is nil, suboptimal performance")
+			cDag := make([]uint32, progpowCacheWords)
+			generateCDag(cDag, ethashCache.cache, number.Uint64()/epochLength)
+			ethashCache.cDag = cDag
+		}
+		mix := make([]byte, hashBytes)
+		return func(dataset []uint32, hash []byte, nonce, number uint64) ([]byte, []byte) {
+			lookup := func(index uint32) []byte {
+				for i := uint32(0); i < hashWords; i++ {
+					binary.LittleEndian.PutUint32(mix[i*4:], dataset[index+i])
+				}
+				return mix
+			}
+			return progpow(hash, nonce, uint64(len(dataset))*4, number, ethashCache.cDag, lookup)
+		}
 	}
 	return func(dataset []uint32, hash []byte, nonce uint64, number uint64) ([]byte, []byte) {
 		return hashimotoFull(dataset, hash, nonce)
