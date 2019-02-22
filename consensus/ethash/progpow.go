@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"math/bits"
 
-	"github.com/ethereum/go-ethereum/crypto/sha3"
+	"golang.org/x/crypto/sha3"
 )
 
 const (
@@ -21,7 +21,7 @@ const (
 )
 
 func progpowLight(size uint64, cache []uint32, hash []byte, nonce uint64, blockNumber uint64, cDag []uint32) ([]byte, []byte) {
-	keccak512 := makeHasher(sha3.NewKeccak512())
+	keccak512 := makeHasher(sha3.NewLegacyKeccak512())
 	lookup := func(index uint32) []byte {
 		return generateDatasetItem(cache, index/16, keccak512)
 	}

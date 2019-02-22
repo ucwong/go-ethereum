@@ -214,7 +214,7 @@ func generateCDag(cDag, cache []uint32, epoch uint64) {
 		return
 	}
 	start := time.Now()
-	keccak512 := makeHasher(sha3.NewKeccak512())
+	keccak512 := makeHasher(sha3.NewLegacyKeccak512())
 
 	for i := uint32(0); i < progpowCacheWords/16; i++ {
 		rawData := generateDatasetItem(cache, i, keccak512)
