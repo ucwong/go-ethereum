@@ -26,7 +26,7 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto/sha3"
+	"golang.org/x/crypto/sha3"
 )
 
 func TestRandomMerge(t *testing.T) {
@@ -208,7 +208,7 @@ func speedyHashForBlock(ctx *periodContext, blocknum uint64, nonce uint64, heade
 		ctx.blockNum = blocknum
 
 	}
-	keccak512 := makeHasher(sha3.NewKeccak512())
+	keccak512 := makeHasher(sha3.NewLegacyKeccak512())
 	lookup := func(index uint32) []byte {
 		x := generateDatasetItem(ctx.cache, index/16, keccak512)
 		//fmt.Printf("lookup(%d) : %x\n", index/16, x)
