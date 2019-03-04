@@ -1573,13 +1573,13 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 		engine = ethash.NewFaker()
 		if !ctx.GlobalBool(FakePoWFlag.Name) {
 			engine = ethash.New(ethash.Config{
-				CacheDir:           stack.ResolvePath(eth.DefaultConfig.Ethash.CacheDir),
-				CachesInMem:        eth.DefaultConfig.Ethash.CachesInMem,
-				CachesOnDisk:       eth.DefaultConfig.Ethash.CachesOnDisk,
-				DatasetDir:         stack.ResolvePath(eth.DefaultConfig.Ethash.DatasetDir),
-				DatasetsInMem:      eth.DefaultConfig.Ethash.DatasetsInMem,
-				DatasetsOnDisk:     eth.DefaultConfig.Ethash.DatasetsOnDisk,
-				ProgpowBlockNumber: config.ProgpowBlock,
+				CacheDir:       stack.ResolvePath(eth.DefaultConfig.Ethash.CacheDir),
+				CachesInMem:    eth.DefaultConfig.Ethash.CachesInMem,
+				CachesOnDisk:   eth.DefaultConfig.Ethash.CachesOnDisk,
+				DatasetDir:     stack.ResolvePath(eth.DefaultConfig.Ethash.DatasetDir),
+				DatasetsInMem:  eth.DefaultConfig.Ethash.DatasetsInMem,
+				DatasetsOnDisk: eth.DefaultConfig.Ethash.DatasetsOnDisk,
+				ProgpowBlock:   config.ProgpowBlock,
 			}, nil, false)
 		}
 	}

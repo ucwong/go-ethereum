@@ -250,7 +250,7 @@ func (n *progpowHashTestcase) UnmarshalJSON(buf []byte) error {
 	return nil
 }
 func TestProgpowHashes(t *testing.T) {
-	data, err := ioutil.ReadFile(filepath.Join("..", "..", "tests", "progpow_testvectors.json"))
+	data, err := ioutil.ReadFile(filepath.Join(".", "testdata", "progpow_testvectors.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
