@@ -86,7 +86,7 @@ func NewLightChain(odr OdrBackend, config *params.ChainConfig, engine consensus.
 		chainDb:       odr.Database(),
 		indexerConfig: odr.IndexerConfig(),
 		odr:           odr,
-		quit:          make(chan struct{}),
+		quit:          make(chan struct{}, 1),
 		bodyCache:     bodyCache,
 		bodyRLPCache:  bodyRLPCache,
 		blockCache:    blockCache,

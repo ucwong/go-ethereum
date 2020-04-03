@@ -81,7 +81,7 @@ func newServerHandler(server *LesServer, blockchain *core.BlockChain, chainDb et
 		blockchain: blockchain,
 		chainDb:    chainDb,
 		txpool:     txpool,
-		closeCh:    make(chan struct{}),
+		closeCh:    make(chan struct{}, 1),
 		synced:     synced,
 	}
 	return handler

@@ -41,7 +41,7 @@ func NewLesOdr(db ethdb.Database, config *light.IndexerConfig, retriever *retrie
 		db:            db,
 		indexerConfig: config,
 		retriever:     retriever,
-		stop:          make(chan struct{}),
+		stop:          make(chan struct{}, 1),
 	}
 }
 

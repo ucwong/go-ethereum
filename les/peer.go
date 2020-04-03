@@ -377,7 +377,7 @@ func newServerPeer(version int, network uint64, trusted bool, p *p2p.Peer, rw p2
 			version:   version,
 			network:   network,
 			sendQueue: utils.NewExecQueue(100),
-			closeCh:   make(chan struct{}),
+			closeCh:   make(chan struct{}, 1),
 		},
 		trusted: trusted,
 	}
@@ -654,7 +654,7 @@ func newClientPeer(version int, network uint64, p *p2p.Peer, rw p2p.MsgReadWrite
 			version:   version,
 			network:   network,
 			sendQueue: utils.NewExecQueue(100),
-			closeCh:   make(chan struct{}),
+			closeCh:   make(chan struct{}, 1),
 		},
 		errCh: make(chan error, 1),
 	}

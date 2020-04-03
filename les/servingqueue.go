@@ -128,7 +128,7 @@ func newServingQueue(suspendBias int64, utilTarget float64) *servingQueue {
 		queueAddCh:     make(chan *servingTask, 100),
 		queueBestCh:    make(chan *servingTask),
 		stopThreadCh:   make(chan struct{}),
-		quit:           make(chan struct{}),
+		quit:           make(chan struct{}, 1),
 		setThreadsCh:   make(chan int, 10),
 		burstLimit:     uint64(utilTarget * bufLimitRatio * 1200000),
 		burstDropLimit: uint64(utilTarget * bufLimitRatio * 1000000),

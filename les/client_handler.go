@@ -50,7 +50,7 @@ func newClientHandler(ulcServers []string, ulcFraction int, checkpoint *params.T
 	handler := &clientHandler{
 		checkpoint: checkpoint,
 		backend:    backend,
-		closeCh:    make(chan struct{}),
+		closeCh:    make(chan struct{}, 1),
 	}
 	if ulcServers != nil {
 		ulc, err := newULC(ulcServers, ulcFraction)

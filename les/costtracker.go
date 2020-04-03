@@ -172,7 +172,7 @@ func newCostTracker(db ethdb.Database, config *eth.Config) (*costTracker, uint64
 
 // stop stops the cost tracker and saves the cost factor statistics to the database
 func (ct *costTracker) stop() {
-	stopCh := make(chan struct{})
+	stopCh := make(chan struct{}, 1)
 	ct.stopCh <- stopCh
 	<-stopCh
 	if makeCostStats {

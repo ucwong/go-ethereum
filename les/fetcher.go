@@ -119,7 +119,7 @@ func newLightFetcher(h *clientHandler) *lightFetcher {
 		timeoutChn:     make(chan uint64),
 		requestTrigger: make(chan struct{}, 1),
 		syncDone:       make(chan *serverPeer),
-		closeCh:        make(chan struct{}),
+		closeCh:        make(chan struct{}, 1),
 		maxConfirmedTd: big.NewInt(0),
 	}
 	h.backend.peers.subscribe(f)

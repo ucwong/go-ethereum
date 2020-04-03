@@ -79,7 +79,7 @@ func NewLesServer(e *eth.Ethereum, config *eth.Config) (*LesServer, error) {
 			chainReader:      e.BlockChain(),
 			chtIndexer:       light.NewChtIndexer(e.ChainDb(), nil, params.CHTFrequency, params.HelperTrieProcessConfirmations),
 			bloomTrieIndexer: light.NewBloomTrieIndexer(e.ChainDb(), nil, params.BloomBitsBlocks, params.BloomTrieFrequency),
-			closeCh:          make(chan struct{}),
+			closeCh:          make(chan struct{}, 1),
 		},
 		archiveMode:  e.ArchiveMode(),
 		peers:        newClientPeerSet(),

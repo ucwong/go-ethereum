@@ -152,7 +152,7 @@ func newServerPool(db ethdb.Database, ulcServers []string) *serverPool {
 		connCh:       make(chan *connReq),
 		disconnCh:    make(chan *disconnReq),
 		registerCh:   make(chan *registerReq),
-		closeCh:      make(chan struct{}),
+		closeCh:      make(chan struct{}, 1),
 		knownSelect:  utils.NewWeightedRandomSelect(),
 		newSelect:    utils.NewWeightedRandomSelect(),
 		fastDiscover: true,

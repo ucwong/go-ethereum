@@ -46,7 +46,7 @@ func newLesTxRelay(ps *serverPeerSet, retriever *retrieveManager) *lesTxRelay {
 		txSent:    make(map[common.Hash]*ltrInfo),
 		txPending: make(map[common.Hash]struct{}),
 		retriever: retriever,
-		stop:      make(chan struct{}),
+		stop:      make(chan struct{}, 1),
 	}
 	ps.subscribe(r)
 	return r

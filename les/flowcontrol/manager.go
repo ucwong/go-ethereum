@@ -134,7 +134,7 @@ func NewClientManager(curve PieceWiseLinear, clock mclock.Clock) *ClientManager 
 
 // Stop stops the client manager
 func (cm *ClientManager) Stop() {
-	stop := make(chan struct{})
+	stop := make(chan struct{}, 1)
 	cm.stop <- stop
 	<-stop
 }

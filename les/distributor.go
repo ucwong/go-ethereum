@@ -79,7 +79,7 @@ func newRequestDistributor(peers *serverPeerSet, clock mclock.Clock) *requestDis
 		clock:    clock,
 		reqQueue: list.New(),
 		loopChn:  make(chan struct{}, 2),
-		closeCh:  make(chan struct{}),
+		closeCh:  make(chan struct{}, 1),
 		peers:    make(map[distPeer]struct{}),
 	}
 	if peers != nil {
