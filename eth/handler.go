@@ -142,8 +142,10 @@ func NewProtocolManager(config *params.ChainConfig, checkpoint *params.TrustedCh
 
 	// If we have trusted checkpoints, enforce them on the chain
 	if checkpoint != nil {
-		manager.checkpointNumber = (checkpoint.SectionIndex+1)*params.CHTFrequency - 1
-		manager.checkpointHash = checkpoint.SectionHead
+		if checkpoint.SectionIndex > 0 {
+			manager.checkpointNumber = (checkpoint.SectionIndex+1)*params.CHTFrequency - 1
+			manager.checkpointHash = checkpoint.SectionHead
+		}
 	}
 
 	// Construct the downloader (long sync) and its backing state bloom if fast
