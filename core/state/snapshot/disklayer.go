@@ -82,13 +82,13 @@ func (dl *diskLayer) Account(hash common.Hash) (*types.SlimAccount, error) {
 // AccountRLP directly retrieves the account RLP associated with a particular
 // hash in the snapshot slim data format.
 func (dl *diskLayer) AccountRLP(hash common.Hash) ([]byte, error) {
+	dl.lock.RLock()
+	defer dl.lock.RUnlock()
 	// If the layer was flattened into, consider it invalid (any live reference to
 	// the original should be marked as unusable).
 	if dl.stale.Load() {
 		return nil, ErrSnapshotStale
 	}
-	dl.lock.RLock()
-	defer dl.lock.RUnlock()
 	// If the layer is being generated, ensure the requested hash has already been
 	// covered by the generator.
 	if dl.genMarker != nil && bytes.Compare(hash[:], dl.genMarker) > 0 {
